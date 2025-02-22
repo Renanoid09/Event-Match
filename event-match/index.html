@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Event Match</title>
+</head>
+<body>
+    <div id="menu">
+        <div class="menu-item" onclick="SelectTab(0)">Player</div>
+        <div class="menu-item" onclick="SelectTab(1)">Map</div>
+        <div class="menu-item" onclick="SelectTab(2)">Gun</div>
+        <div class="menu-item" onclick="SelectTab(3)">Role</div>
+        <div class="menu-item" onclick="SelectTab(4)">Team</div>
+    </div>
+    <div id="player" class="tab">
+        <div id="player-list" class="list"></div>
+        <button id="player-submit" class="submit" onclick="SubmitPlayerName()">Submit</button>
+    </div>
+    <div id="map" class="tab">
+        <div id="map-list" class="list"></div>
+        <button id="map-submit" class="submit" onclick="SubmitMap()">Submit</button>
+    </div>
+    <div id="gun" class="tab">
+        <div id="gun-list" class="list"></div>
+        <button id="gun-submit" class="submit" onclick="SubmitGun()">Submit</button>
+    </div>
+    <div id="role" class="tab">
+        <div id="role-list" class="list"></div>
+        <button id="role-submit" class="submit" onclick="SubmitRole()">Submit</button>
+    </div>
+    <div id="team" class="tab">
+        <h1 id="map-result">Map: </h1>
+        <div id="result-list">
+            <div id="attacker" class="result"><h1>Attacker</h1></div>
+            <div id="defender" class="result"><h1>Defender</h1></div>
+        </div>
+    </div>
+    <script type="text/javascript" src="script.js"></script>
+</body>
+</html>
