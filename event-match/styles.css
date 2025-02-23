@@ -3,6 +3,7 @@
     margin: 0;
     box-sizing: content-box;
     user-select: none;
+    font-language-override: 'lang';
 }
 
 html, body {
@@ -19,12 +20,12 @@ body > * {
 
 #menu {
     display: grid;
-    grid-template-columns: repeat(5, 15%);
+    grid-template-columns: repeat(5, 15%) 15%;
     align-items: center;
     width: 90%;
 }
 
-.menu-item {
+.menu-item, .extra-menu {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,11 +35,6 @@ body > * {
     transition: all .5s;
     cursor: pointer;
     border: 2px solid black;
-}
-
-.menu-item:hover {
-    background-color: rgb(0, 0, 0);
-    color: white;
 }
 
 .tab {
@@ -96,7 +92,7 @@ body > * {
     align-items: center;
     font-size: 30px;
     background-color: rgb(255, 200, 200);
-    transition: all .5s;
+    transition: background .5s;
 }
 
 .role {
@@ -136,6 +132,11 @@ body > * {
     grid-template-rows: 12% repeat(5, auto);
     justify-items: center;
     align-items: center;
+}
+
+.result-text {
+    font-size: 30px;
+    font-weight: bold;
 }
 
 #attacker {

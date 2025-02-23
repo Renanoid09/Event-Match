@@ -1,215 +1,153 @@
-const TABS = document.getElementsByClassName("tab");
-const MENU = document.getElementsByClassName("menu-item");
-
-const LIST = {
-    maps: ["Bind", "Haven", "Split", "Ascent", "Icebox", "Breeze", "Fracture", "Pearl", "Lotus", "Sunset", "Abyss"],
-    guns: ["SMG / Sheriff", "Shotgun / Ghost", "Rifle / classic", "Sniper / Frenzy", "Machinegun / Shorty"],
-    roles: ["Controller", "Initiator", "Sentinel", "Duelist", "Flex"],
-    player: [], map: [], gun: [], role: []
-}
-
-const SelectTab = (tab) => {
+const SelectTab = (value) => {
     for (let i = 0; i < TABS.length; i++) {
-        TABS[i].style.display = (i == tab) ? "grid" : "none";
-        if (TABS[i].style.display == "none") MENU[i].classList.remove("selected");
-        else MENU[i].classList.add("selected");
+        TABS[i].style.display = "none";
+        MENUS[i].classList.remove("selected");
+    }
+    MENUS[INDEX[value]].classList.add("selected");
+    TABS[INDEX[value]].style.display = "grid";
+}
+
+const ActivateMenuButton = () => {
+    for (let menu of MENUS) {
+        menu.onclick = () => SelectTab(menu.getAttribute("value").toLowerCase());
     }
 }
 
-const CreatePlayerOption = () => {
-    for (let i = 0; i < 10; i++) {
-        let playerName = document.createElement("input");
-        playerName.classList.add("player-name");
-        document.getElementById("player-list").appendChild(playerName);
-    }
+const Filter = (list, element) => {
+    document.getElementById(element).classList.toggle("selected");
+    if (CURRENT[list].includes(element)) CURRENT[list].splice(CURRENT[list].indexOf(element), 1);
+    else CURRENT[list].push(element);
 }
 
-const SubmitPlayerName = () => {
-    LIST.player = [];
-    const PLAYER_NAMES = document.getElementsByClassName("player-name");
+SUBMITS[INDEX["player"]].onclick = () => {
+    CURRENT.player = [];
     for (let playerName of PLAYER_NAMES) {
-        if (playerName.value == "" || LIST.player.includes(playerName.value)) {
+        const playerNameValue = (playerName.value == "") ? playerName.placeholder : playerName.value;
+        if (CURRENT.player.includes(playerNameValue)) {
             playerName.classList.add("invalid");
             continue;
-        }   
+        }
+        CURRENT.player.push(playerNameValue);
         playerName.classList.remove("invalid");
-        LIST.player.push(playerName.value);
     }
-    if (LIST.player.length == 10) {
-        SelectTeam();
-        SelectTab(1);
-        return true;
+    if (CURRENT.player.length != 10) return;
+    for (let resultName of RESULT_PLAYER_NAMES) {
+        const selectedPlayer = CURRENT.player[Math.floor(Math.random() * CURRENT.player.length)];
+        resultName.innerHTML = selectedPlayer;
+        CURRENT.player.splice(CURRENT.player.indexOf(selectedPlayer), 1);
     }
-    SelectTab(0);
-    return false;
+    SelectTab("map");
 }
 
-const CreateMapOption = () => {
-    const MAP_LIST = document.getElementById("map-list");
-    for (let [index, map] of LIST.maps.entries()) {
-        const mapDiv = document.createElement("div");
-        mapDiv.classList.add("map");
-        mapDiv.classList.add("selected");
-        mapDiv.innerHTML = map;
-        mapDiv.value = map;
-        mapDiv.onclick = () => FilterMap(index);
-        MAP_LIST.appendChild(mapDiv);
-    }
+SUBMITS[INDEX["map"]].onclick = () => {
+    const selectedMap = CURRENT.map[Math.floor(Math.random() * CURRENT.map.length)];
+    RESULT_MAP.innerHTML = `Maps: ${selectedMap}`;
+    RESULT_MAP.value = selectedMap;
+    SelectTab("gun");
 }
 
-const FilterMap = (index) => {
-    const selectedDiv = document.getElementsByClassName("map")[index];
-    if ([...selectedDiv.classList].includes("selected")) selectedDiv.classList.remove("selected");
-    else selectedDiv.classList.add("selected");
+SUBMITS[INDEX["gun"]].onclick = () => {
+    let availableGun = [...CURRENT.gun];
+    for (let i = 0; i < 10; i++) {
+        if (i == 5 || availableGun.length == 0) availableGun = [...CURRENT.gun];
+        const selectedGun = availableGun[Math.floor(Math.random() * availableGun.length)];
+        RESULT_PLAYER_GUNS[i].value = selectedGun;
+        RESULT_PLAYER_GUNS[i].innerHTML = selectedGun;
+        availableGun.splice(availableGun.indexOf(selectedGun), 1);
+    }
+    SelectTab("role");
 }
 
-const SubmitMap = () => {
-    LIST.map = [];
-    for (let map of document.getElementsByClassName("map")) {
-        map.classList.remove("invalid");
-        if ([...map.classList].includes("selected")) LIST.map.push(map.value);
+SUBMITS[INDEX["role"]].onclick = () => {
+    let availableRole = [...CURRENT.role];
+    for (let i = 0; i < 10; i++) {
+        if (i == 5 || availableRole.length == 0) availableRole = [...CURRENT.role];
+        const selectedRole = availableRole[Math.floor(Math.random() * availableRole.length)];
+        RESULT_PLAYER_ROLES[i].value = selectedRole;
+        RESULT_PLAYER_ROLES[i].innerHTML = selectedRole;
+        availableRole.splice(availableRole.indexOf(selectedRole), 1);
     }
-    if (LIST.map.length == 0) {
-        for (let map of document.getElementsByClassName("map")) {
-            map.classList.add("invalid");
+    SelectTab("team");
+}
+
+LANGUAGE_TAB.onclick = () => {
+    language = (language == "EN") ? "JP" : "EN";
+    if (language == "JP") {
+        LANGUAGE_TAB.innerHTML = "English";
+        for (let menu of MENUS) {
+            menu.innerHTML = LANGUAGE[language][menu.getAttribute("value")];
         }
-        SelectTab(1);
-        return false;
-    }
-    SelectTab(2);
-    SelectMap();
-    return true;
-}
-
-const CreateGunOption = () => {
-    const GUN_LIST = document.getElementById("gun-list");
-    for (let [index, gun] of LIST.guns.entries()) {
-        const gunDiv = document.createElement("div");
-        gunDiv.classList.add("gun");
-        gunDiv.classList.add("selected");
-        gunDiv.innerHTML = gun;
-        gunDiv.value = gun;
-        gunDiv.onclick = () => FilterGun(index);
-        GUN_LIST.appendChild(gunDiv);
-    }
-}
-
-const FilterGun = (index) => {
-    const selectedDiv = document.getElementsByClassName("gun")[index];
-    if ([...selectedDiv.classList].includes("selected")) selectedDiv.classList.remove("selected");
-    else selectedDiv.classList.add("selected");
-}
-
-const SubmitGun = () => {
-    LIST.gun = [];
-    for (let gun of document.getElementsByClassName("gun")) {
-        gun.classList.remove("invalid");
-        if ([...gun.classList].includes("selected")) LIST.gun.push(gun.value);
-    }
-    if (LIST.gun.length == 0) {
-        for (let gun of document.getElementsByClassName("gun")) {
-            gun.classList.add("invalid");
+        for (let i = 0; i < document.getElementsByClassName("player-name").length; i++) {
+            document.getElementsByClassName("player-name")[i].placeholder = `${LANGUAGE[language]["Player"]} ${i + 1}`;
         }
-        SelectTab(2);
-        return false;
-    }
-    SelectGun();
-    SelectTab(3);
-    return true;
-}
-
-const CreateRoleOption = () => {
-    const ROLE_LIST = document.getElementById("role-list");
-    for (let [index, role] of LIST.roles.entries()) {
-        const roleDiv = document.createElement("div");
-        roleDiv.classList.add("role");
-        roleDiv.classList.add("selected");
-        roleDiv.innerHTML = role;
-        roleDiv.value = role;
-        roleDiv.onclick = () => FilterRole(index);
-        ROLE_LIST.appendChild(roleDiv);
-    }
-}
-
-const FilterRole = (index) => {
-    const selectedDiv = document.getElementsByClassName("role")[index];
-    if ([...selectedDiv.classList].includes("selected")) selectedDiv.classList.remove("selected");
-    else selectedDiv.classList.add("selected");
-}
-
-const SubmitRole = () => {
-    LIST.role = [];
-    for (let role of document.getElementsByClassName("role")) {
-        role.classList.remove("invalid");
-        if ([...role.classList].includes("selected")) LIST.role.push(role.value);
-    }
-    if (LIST.role.length == 0) {
-        for (let role of document.getElementsByClassName("role")) {
-            role.classList.add("invalid");
+        SUBMITS[INDEX["player"]].innerHTML = LANGUAGE[language]["Create Team"];
+        for (let map of LISTS[INDEX["map"]].children) {
+            map.innerHTML = LANGUAGE[language][map.id];
         }
-        return false;
-    }
-    SelectRole();
-    if (SubmitPlayerName() && SubmitMap() && SubmitGun()) SelectTab(4);
-}
-
-const CreateResult = () => {
-    for (let result of document.getElementsByClassName("result")) {
-        for (let i = 0; i < 5; i++) {
-            const resultDiv = document.createElement("div");
-            resultDiv.classList.add("result-player");
-            const playerName = document.createElement("div");
-            playerName.classList.add("result-player-name");
-            resultDiv.appendChild(playerName);
-            const gun = document.createElement("div");
-            gun.classList.add("result-player-gun");
-            resultDiv.appendChild(gun);
-            const role = document.createElement("div");
-            role.classList.add("result-player-role");
-            resultDiv.appendChild(role);
-            result.appendChild(resultDiv);
+        SUBMITS[INDEX["map"]].innerHTML = LANGUAGE[language]["Choose Map"];
+        for (let gun of LISTS[INDEX["gun"]].children) {
+            gun.innerHTML = LANGUAGE[language][gun.id];
+            gun.style.fontSize = "24px";
+        }
+        SUBMITS[INDEX["gun"]].innerHTML = LANGUAGE[language]["Assign Guns"];
+        for (let role of LISTS[INDEX["role"]].children) {
+            role.innerHTML =  LANGUAGE[language][role.id];
+        }
+        SUBMITS[INDEX["role"]].innerHTML = LANGUAGE[language]["Assign Role"];
+        RESULT_MAP.innerHTML = `${LANGUAGE[language]["Map"]}: ${(RESULT_MAP.value == undefined) ? "" : LANGUAGE[language][RESULT_MAP.value]}`;
+        RESULT_ATTACKER.innerText = LANGUAGE[language]["Attacker"];
+        RESULT_DEFENDER.innerText = LANGUAGE[language]["Defender"];
+        for (let resultGun of RESULT_PLAYER_GUNS) {
+            resultGun.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultGun.value]);
+            resultGun.style.fontSize = "18px";
+        }
+        for (let resultRole of RESULT_PLAYER_ROLES) {
+            resultRole.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultRole.value]);
+            resultRole.style.fontSize = "25px";
         }
     }
-}
-
-const SelectTeam = () => {
-    let currentPlayer = [...LIST.player];
-    for (let result of document.getElementsByClassName("result-player-name")) {
-        const selectedPlayer = currentPlayer[Math.floor(Math.random() * currentPlayer.length)];
-        currentPlayer.splice(currentPlayer.indexOf(selectedPlayer), 1);
-        result.innerHTML = selectedPlayer;
-    }
-}
-
-const SelectMap = () => {
-    document.getElementById("map-result").innerHTML = `Map: ${LIST.map[Math.floor(Math.random() * LIST.map.length)]}`;
-}
-
-const SelectGun = () => {
-    let currentGun = [...LIST.gun];
-    for (let result of document.getElementsByClassName("result-player-gun")) {
-        if (currentGun.length == 0) currentGun = [...LIST.gun];
-        const selectedGun = currentGun[Math.floor(Math.random() * currentGun.length)];
-        currentGun.splice(currentGun.indexOf(selectedGun), 1);
-        result.innerHTML = selectedGun;
-    }
-}
-
-const SelectRole = () => {
-    let currentRole = [...LIST.role];
-    for (let result of document.getElementsByClassName("result-player-role")) {
-        if (currentRole.length == 0) currentRole = [...LIST.role];
-        const selectedRole = currentRole[Math.floor(Math.random() * currentRole.length)];
-        currentRole.splice(currentRole.indexOf(selectedRole), 1);
-        result.innerHTML = selectedRole;
+    else if (language == "EN") {
+        LANGUAGE_TAB.innerHTML = "日本語";
+        for (let menu of MENUS) {
+            menu.innerHTML = menu.getAttribute("value");
+        }
+        for (let i = 0; i < document.getElementsByClassName("player-name").length; i++) {
+            document.getElementsByClassName("player-name")[i].placeholder = `Player ${i + 1}`;
+        }
+        SUBMITS[INDEX["player"]].innerHTML = "Create Team";
+        for (let map of LISTS[INDEX["map"]].children) {
+            map.innerHTML = map.id;
+        }
+        SUBMITS[INDEX["map"]].innerHTML = "Choose Map";
+        for (let gun of LISTS[INDEX["gun"]].children) {
+            gun.innerHTML = gun.id;
+            gun.style.fontSize = "30px";
+        }
+        SUBMITS[INDEX["gun"]].innerHTML ="Assign Guns";
+        for (let role of LISTS[INDEX["role"]].children) {
+            role.innerHTML =  role.id;
+        }
+        SUBMITS[INDEX["role"]].innerHTML ="Assign Role";
+        RESULT_MAP.innerHTML = `Map: ${(RESULT_MAP.value == undefined) ? "" : RESULT_MAP.value}`;
+        RESULT_ATTACKER.innerText = "Attacker";
+        RESULT_DEFENDER.innerText = "Defender";
+        for (let resultGun of RESULT_PLAYER_GUNS) {
+            resultGun.innerHTML = ((resultGun.value == undefined) ? "" : resultGun.value);
+            resultGun.style.fontSize = "25px";
+        }
+        for (let resultRole of RESULT_PLAYER_ROLES) {
+            resultRole.innerHTML = ((resultRole.value == undefined) ? "" : resultRole.value);;
+            resultRole.style.fontSize = "30px";
+        }
     }
 }
 
 window.onload = () => {
+    SelectTab("player");
+    ActivateMenuButton();
     CreatePlayerOption();
     CreateMapOption();
     CreateGunOption();
     CreateRoleOption();
     CreateResult();
-    SelectTab(0);
 }
