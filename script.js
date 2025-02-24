@@ -52,7 +52,7 @@ SUBMITS[INDEX["gun"]].onclick = () => {
         if (i == 5 || availableGun.length == 0) availableGun = [...CURRENT.gun];
         const selectedGun = availableGun[Math.floor(Math.random() * availableGun.length)];
         RESULT_PLAYER_GUNS[i].value = selectedGun;
-        RESULT_PLAYER_GUNS[i].innerHTML = selectedGun;
+        RESULT_PLAYER_GUNS[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedGun]}`;
         availableGun.splice(availableGun.indexOf(selectedGun), 1);
     }
     SelectTab("role");
