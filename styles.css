@@ -197,6 +197,7 @@ html, body {
 
 .invalid {
     border: .1vw solid red;
+    background-color: rgb(255, 200, 200);
 }
 
 .selected {

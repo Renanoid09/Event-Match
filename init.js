@@ -6,6 +6,8 @@ const SUBMITS = document.getElementsByClassName("submit");
 
 const PLAYER_NAMES = document.getElementsByClassName("player-name");
 const MAP_LIST = document.getElementById("map-list");
+const GUN_LIST = document.getElementById("gun-list");
+const ROLE_LIST = document.getElementById("role-list");
 
 const RESULT_MAP = document.getElementById("map-result");
 const RESULT_ATTACKER = document.getElementsByClassName("result-text")[0];
@@ -14,20 +16,20 @@ const RESULT_PLAYER_NAMES = document.getElementsByClassName("result-player-name"
 const RESULT_PLAYER_GUNS = document.getElementsByClassName("result-player-gun");
 const RESULT_PLAYER_ROLES = document.getElementsByClassName("result-player-role");
 
-const INDEX = {"player": 0, "map": 1, "gun": 2, "role": 3, "team": 4}
+const INDEX = {"player": 0, "map": 1, "gun": 2, "role": 3, "team": 4};
 
 const OPTIONS = {
     maps: ["Bind", "Haven", "Split", "Ascent", "Icebox", "Breeze", "Fracture", "Pearl", "Lotus", "Sunset", "Abyss"],
     guns: ["SMG / Sheriff", "Shotgun / Ghost", "Rifle / classic", "Sniper / Frenzy", "Machinegun / Shorty"],
     roles: ["Controller", "Initiator", "Sentinel", "Duelist", "Flex"]
-}
+};
 
 const CURRENT = {
     player: [], 
-    map: ["Bind", "Haven", "Split", "Ascent", "Icebox", "Breeze", "Fracture", "Pearl", "Lotus", "Sunset", "Abyss"], 
-    gun: ["SMG / Sheriff", "Shotgun / Ghost", "Rifle / classic", "Sniper / Frenzy", "Machinegun / Shorty"], 
-    role: ["Controller", "Initiator", "Sentinel", "Duelist", "Flex"]
-}
+    map: [...OPTIONS.maps], 
+    gun: [...OPTIONS.guns], 
+    role: [...OPTIONS.roles]
+};
 
 const LANGUAGE = {
     option: ["English", "日本語"],
