@@ -41,7 +41,7 @@ SUBMITS[INDEX["player"]].onclick = () => {
 
 SUBMITS[INDEX["map"]].onclick = () => {
     const selectedMap = CURRENT.map[Math.floor(Math.random() * CURRENT.map.length)];
-    RESULT_MAP.innerHTML = `Maps: ${selectedMap}`;
+    RESULT_MAP.innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]]["Map"]}: ${LANGUAGE[LANGUAGE.option[languageIndex]][selectedMap]}`;
     RESULT_MAP.value = selectedMap;
     SelectTab("gun");
 }
@@ -64,81 +64,43 @@ SUBMITS[INDEX["role"]].onclick = () => {
         if (i == 5 || availableRole.length == 0) availableRole = [...CURRENT.role];
         const selectedRole = availableRole[Math.floor(Math.random() * availableRole.length)];
         RESULT_PLAYER_ROLES[i].value = selectedRole;
-        RESULT_PLAYER_ROLES[i].innerHTML = selectedRole;
+        RESULT_PLAYER_ROLES[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedRole]}`;
         availableRole.splice(availableRole.indexOf(selectedRole), 1);
     }
     SelectTab("team");
 }
 
 LANGUAGE_TAB.onclick = () => {
-    language = (language == "EN") ? "JP" : "EN";
-    if (language == "JP") {
-        LANGUAGE_TAB.innerHTML = "English";
-        for (let menu of MENUS) {
-            menu.innerHTML = LANGUAGE[language][menu.getAttribute("value")];
-        }
-        for (let i = 0; i < document.getElementsByClassName("player-name").length; i++) {
-            document.getElementsByClassName("player-name")[i].placeholder = `${LANGUAGE[language]["Player"]} ${i + 1}`;
-        }
-        SUBMITS[INDEX["player"]].innerHTML = LANGUAGE[language]["Create Team"];
-        for (let map of LISTS[INDEX["map"]].children) {
-            map.innerHTML = LANGUAGE[language][map.id];
-        }
-        SUBMITS[INDEX["map"]].innerHTML = LANGUAGE[language]["Choose Map"];
-        for (let gun of LISTS[INDEX["gun"]].children) {
-            gun.innerHTML = LANGUAGE[language][gun.id];
-            gun.style.fontSize = "24px";
-        }
-        SUBMITS[INDEX["gun"]].innerHTML = LANGUAGE[language]["Assign Guns"];
-        for (let role of LISTS[INDEX["role"]].children) {
-            role.innerHTML =  LANGUAGE[language][role.id];
-        }
-        SUBMITS[INDEX["role"]].innerHTML = LANGUAGE[language]["Assign Role"];
-        RESULT_MAP.innerHTML = `${LANGUAGE[language]["Map"]}: ${(RESULT_MAP.value == undefined) ? "" : LANGUAGE[language][RESULT_MAP.value]}`;
-        RESULT_ATTACKER.innerText = LANGUAGE[language]["Attacker"];
-        RESULT_DEFENDER.innerText = LANGUAGE[language]["Defender"];
-        for (let resultGun of RESULT_PLAYER_GUNS) {
-            resultGun.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultGun.value]);
-            resultGun.style.fontSize = "18px";
-        }
-        for (let resultRole of RESULT_PLAYER_ROLES) {
-            resultRole.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultRole.value]);
-            resultRole.style.fontSize = "25px";
-        }
+    languageIndex = (languageIndex + 1) % LANGUAGE.option.length;
+    const language = LANGUAGE.option[languageIndex];
+    LANGUAGE_TAB.innerHTML = LANGUAGE.option[(languageIndex + 1) % LANGUAGE.option.length];
+    for (let menu of MENUS) {
+        menu.innerHTML = LANGUAGE[language][menu.getAttribute("value")];
     }
-    else if (language == "EN") {
-        LANGUAGE_TAB.innerHTML = "日本語";
-        for (let menu of MENUS) {
-            menu.innerHTML = menu.getAttribute("value");
-        }
-        for (let i = 0; i < document.getElementsByClassName("player-name").length; i++) {
-            document.getElementsByClassName("player-name")[i].placeholder = `Player ${i + 1}`;
-        }
-        SUBMITS[INDEX["player"]].innerHTML = "Create Team";
-        for (let map of LISTS[INDEX["map"]].children) {
-            map.innerHTML = map.id;
-        }
-        SUBMITS[INDEX["map"]].innerHTML = "Choose Map";
-        for (let gun of LISTS[INDEX["gun"]].children) {
-            gun.innerHTML = gun.id;
-            gun.style.fontSize = "30px";
-        }
-        SUBMITS[INDEX["gun"]].innerHTML ="Assign Guns";
-        for (let role of LISTS[INDEX["role"]].children) {
-            role.innerHTML =  role.id;
-        }
-        SUBMITS[INDEX["role"]].innerHTML ="Assign Role";
-        RESULT_MAP.innerHTML = `Map: ${(RESULT_MAP.value == undefined) ? "" : RESULT_MAP.value}`;
-        RESULT_ATTACKER.innerText = "Attacker";
-        RESULT_DEFENDER.innerText = "Defender";
-        for (let resultGun of RESULT_PLAYER_GUNS) {
-            resultGun.innerHTML = ((resultGun.value == undefined) ? "" : resultGun.value);
-            resultGun.style.fontSize = "25px";
-        }
-        for (let resultRole of RESULT_PLAYER_ROLES) {
-            resultRole.innerHTML = ((resultRole.value == undefined) ? "" : resultRole.value);;
-            resultRole.style.fontSize = "30px";
-        }
+    for (let i = 0; i < document.getElementsByClassName("player-name").length; i++) {
+        document.getElementsByClassName("player-name")[i].placeholder = `${LANGUAGE[language]["Player"]} ${i + 1}`;
+    }
+    SUBMITS[INDEX["player"]].innerHTML = LANGUAGE[language]["Create Team"];
+    for (let map of LISTS[INDEX["map"]].children) {
+        map.innerHTML = LANGUAGE[language][map.id];
+    }
+    SUBMITS[INDEX["map"]].innerHTML = LANGUAGE[language]["Choose Map"];
+    for (let gun of LISTS[INDEX["gun"]].children) {
+        gun.innerHTML = LANGUAGE[language][gun.id];
+    }
+    SUBMITS[INDEX["gun"]].innerHTML = LANGUAGE[language]["Assign Guns"];
+    for (let role of LISTS[INDEX["role"]].children) {
+        role.innerHTML =  LANGUAGE[language][role.id];
+    }
+    SUBMITS[INDEX["role"]].innerHTML = LANGUAGE[language]["Assign Role"];
+    RESULT_MAP.innerHTML = `${LANGUAGE[language]["Map"]}: ${(RESULT_MAP.value == undefined) ? "" : LANGUAGE[language][RESULT_MAP.value]}`;
+    RESULT_ATTACKER.innerText = LANGUAGE[language]["Attacker"];
+    RESULT_DEFENDER.innerText = LANGUAGE[language]["Defender"];
+    for (let resultGun of RESULT_PLAYER_GUNS) {
+        resultGun.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultGun.value]);
+    }
+    for (let resultRole of RESULT_PLAYER_ROLES) {
+        resultRole.innerHTML = ((resultRole.value == undefined) ? "" : LANGUAGE[language][resultRole.value]);
     }
 }
 

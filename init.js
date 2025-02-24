@@ -30,13 +30,47 @@ const CURRENT = {
 }
 
 const LANGUAGE = {
-    "JP": {
+    option: ["English", "日本語"],
+    "English": {
+        "Player": "Player",
+        "Map": "Map",
+        "Gun": "Gun",
+        "Role": "Role",
+        "Team": "Team",
+        "Create Team": "Create Team",
+        "Bind": "Bind", 
+        "Haven": "Haven", 
+        "Split": "Split", 
+        "Ascent": "Ascent", 
+        "Icebox": "Icebox", 
+        "Breeze": "Breeze", 
+        "Fracture": "Fracture", 
+        "Pearl": "Pearl", 
+        "Lotus": "Lotus", 
+        "Sunset": "Sunset", 
+        "Abyss": "Abyss",
+        "Choose Map": "Choose Map",
+        "SMG / Sheriff": "SMG / Sheriff", 
+        "Shotgun / Ghost": "Shotgun / Ghost", 
+        "Rifle / classic": "Rifle / classic", 
+        "Sniper / Frenzy": "Sniper / Frenzy", 
+        "Machinegun / Shorty": "Machinegun / Shorty",
+        "Assign Guns": "Assign Guns",
+        "Controller": "Controller", 
+        "Initiator": "Initiator", 
+        "Sentinel": "Sentinel", 
+        "Duelist": "Duelist", 
+        "Flex": "Flex",
+        "Assign Role": "Assign Role",
+        "Attacker": "Attacker",
+        "Defender": "Defender"
+    },
+    "日本語": {
         "Player": "プレイヤー",
         "Map": "マップ",
         "Gun": "武器",
         "Role": "ロール",
         "Team": "チーム",
-        "Japanese": "日本語",
         "Create Team": "チームを構成",
         "Bind": "バインド", 
         "Haven": "ヘイブン", 
@@ -67,12 +101,14 @@ const LANGUAGE = {
     }
 };
 
-let language = "EN";
+let languageIndex = 0;
 
 const CreatePlayerOption = () => {
     for (let i = 0; i < 10; i++) {
         let playerName = document.createElement("input");
         playerName.classList.add("player-name");
+        playerName.id = `Player ${i + 1}`;
+        playerName.name = `Player ${i + 1}`;
         playerName.placeholder = `Player ${i + 1}`;
         LISTS[INDEX["player"]].appendChild(playerName);
     }
