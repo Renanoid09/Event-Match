@@ -12,6 +12,7 @@ const ROLE_LIST = document.getElementById("role-list");
 const RESULT_MAP = document.getElementById("map-result");
 const RESULT_ATTACKER = document.getElementsByClassName("result-text")[0];
 const RESULT_DEFENDER =  document.getElementsByClassName("result-text")[1];
+const RESULT_INDICATORS = document.getElementsByClassName("indicator");
 const RESULT_PLAYER_NAMES = document.getElementsByClassName("result-player-name");
 const RESULT_PLAYER_GUNS = document.getElementsByClassName("result-player-gun");
 const RESULT_PLAYER_ROLES = document.getElementsByClassName("result-player-role");

@@ -130,7 +130,7 @@ html, body {
     width: 40vw;
     height: 65vh;
     display: grid;
-    grid-template-rows: 10% repeat(5, auto);
+    grid-template-rows: 10% 8% repeat(5, auto);
     justify-items: center;
     align-items: center;
 }
@@ -142,7 +142,6 @@ html, body {
     text-indent: 2vw;
     height: 5vh;
     width: 100%;
-    border-bottom:  solid black;
     align-items: center;
     text-align: center;
 }
@@ -158,6 +157,20 @@ html, body {
 
 #defender {
     background-color: rgb(180, 255, 180);
+}
+
+.indicator {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    border-bottom: .1vw solid black;
+    border-top: .1vw solid black;
+    height: 100%;
+}
+
+.indicator > * {
+    font-size: 1.5vw;
 }
 
 .result-player {

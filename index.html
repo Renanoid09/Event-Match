@@ -32,10 +32,24 @@
         <button id="role-submit" class="submit" value="role">Assign Role</button>
     </div>
     <div id="team" class="tab">
-        <h1 id="map-result">Map: </h1>
+        <h1 id="map-result"></h1>
         <div id="result-list">
-            <div id="attacker" class="result"><div class="result-text">Attacker</div></div>
-            <div id="defender" class="result"><div class="result-text">Defender</div></div>
+            <div id="attacker" class="result">
+                <div class="result-text">Attacker</div>
+                <div class="indicator">
+                    <div value="Player">Player</div>
+                    <div value="Gun">Gun</div>
+                    <div value="Role">Role</div>
+                </div>
+            </div> 
+            <div id="defender" class="result">
+                <div class="result-text">Defender</div>
+                <div class="indicator">
+                    <div value="Player">Player</div>
+                    <div value="Gun">Gun</div>
+                    <div value="Role">Role</div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript" src="init.js"></script>

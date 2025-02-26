@@ -14,6 +14,7 @@ const ActivateMenuButton = () => {
 }
 
 const Filter = (list, element) => {
+    if (CURRENT[list].length == 1) return;
     document.getElementById(element).classList.toggle("selected");
     if (CURRENT[list].includes(element)) CURRENT[list].splice(CURRENT[list].indexOf(element), 1);
     else CURRENT[list].push(element);
@@ -39,55 +40,33 @@ SUBMITS[INDEX["player"]].onclick = () => {
 }
 
 SUBMITS[INDEX["map"]].onclick = () => {
-    if (CURRENT.map.length == 0) {
-        RESULT_MAP.innerHTML = "";
-       if (![...MENUS[INDEX["map"]].classList].includes("invalid")) MENUS[INDEX["map"]].classList.add("invalid");
-    }
-    else {
-        MENUS[INDEX["map"]].classList.remove("invalid");
-        const selectedMap = CURRENT.map[Math.floor(Math.random() * CURRENT.map.length)];
-        RESULT_MAP.innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]]["Map"]}: ${LANGUAGE[LANGUAGE.option[languageIndex]][selectedMap]}`;
-        RESULT_MAP.value = selectedMap;
-    }
+    MENUS[INDEX["map"]].classList.remove("invalid");
+    const selectedMap = CURRENT.map[Math.floor(Math.random() * CURRENT.map.length)];
+    RESULT_MAP.innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]]["Map"]}: ${LANGUAGE[LANGUAGE.option[languageIndex]][selectedMap]}`;
+    RESULT_MAP.value = selectedMap;
     SelectTab("gun");
 }
 
 SUBMITS[INDEX["gun"]].onclick = () => {
-    if (CURRENT.gun.length == 0) {
-       if (![...MENUS[INDEX["gun"]].classList].includes("invalid")) MENUS[INDEX["gun"]].classList.add("invalid");
-    }
-    else {
-        MENUS[INDEX["gun"]].classList.remove("invalid");
-        let availableGun = [...CURRENT.gun];
-        for (let i = 0; i < 10; i++) {
-            if (i == 5 || availableGun.length == 0) availableGun = [...CURRENT.gun];
-            const selectedGun = availableGun.splice(Math.floor(Math.random() * availableGun.length), 1);
-            RESULT_PLAYER_GUNS[i].value = selectedGun;
-            RESULT_PLAYER_GUNS[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedGun]}`;
-        }
-    }
-    for (let gun of RESULT_PLAYER_GUNS) {
-        gun.style.display = ([...MENUS[INDEX["gun"]].classList].includes("invalid")) ? "none" : "flex";
+    MENUS[INDEX["gun"]].classList.remove("invalid");
+    let availableGun = [...CURRENT.gun];
+    for (let i = 0; i < 10; i++) {
+        if (i == 5 || availableGun.length == 0) availableGun = [...CURRENT.gun];
+        const selectedGun = availableGun.splice(Math.floor(Math.random() * availableGun.length), 1);
+        RESULT_PLAYER_GUNS[i].value = selectedGun;
+        RESULT_PLAYER_GUNS[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedGun]}`;
     }
     SelectTab("role");
 }
 
 SUBMITS[INDEX["role"]].onclick = () => {
-    if (CURRENT.role.length == 0) {
-       if (![...MENUS[INDEX["role"]].classList].includes("invalid")) MENUS[INDEX["role"]].classList.add("invalid");
-    }
-    else {
-        MENUS[INDEX["role"]].classList.remove("invalid");
-        let availableRole = [...CURRENT.role];
-        for (let i = 0; i < 10; i++) {
-            if (i == 5 || availableRole.length == 0) availableRole = [...CURRENT.role];
-            const selectedRole = availableRole.splice(Math.floor(Math.random() * availableRole.length), 1);
-            RESULT_PLAYER_ROLES[i].value = selectedRole;
-            RESULT_PLAYER_ROLES[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedRole]}`;
-        }
-    }
-    for (let role of RESULT_PLAYER_ROLES) {
-        role.style.display = ([...MENUS[INDEX["role"]].classList].includes("invalid")) ? "none" : "flex";
+    MENUS[INDEX["role"]].classList.remove("invalid");
+    let availableRole = [...CURRENT.role];
+    for (let i = 0; i < 10; i++) {
+        if (i == 5 || availableRole.length == 0) availableRole = [...CURRENT.role];
+        const selectedRole = availableRole.splice(Math.floor(Math.random() * availableRole.length), 1);
+        RESULT_PLAYER_ROLES[i].value = selectedRole;
+        RESULT_PLAYER_ROLES[i].innerHTML = `${LANGUAGE[LANGUAGE.option[languageIndex]][selectedRole]}`;
     }
     SelectTab("team");
 }
@@ -115,11 +94,19 @@ LANGUAGE_TAB.onclick = () => {
         role.innerHTML =  LANGUAGE[language][role.id];
     }
     SUBMITS[INDEX["role"]].innerHTML = LANGUAGE[language]["Assign Role"];
-    RESULT_MAP.innerHTML = (CURRENT.map.length == 0) ? "" : `${LANGUAGE[language]["Map"]}: ${LANGUAGE[language][RESULT_MAP.value]}`;
+    RESULT_MAP.innerHTML = (CURRENT.map.length == 0 || RESULT_MAP.value == undefined) ? "" : `${LANGUAGE[language]["Map"]}: ${LANGUAGE[language][RESULT_MAP.value]}`;
     RESULT_ATTACKER.innerText = LANGUAGE[language]["Attacker"];
     RESULT_DEFENDER.innerText = LANGUAGE[language]["Defender"];
+    for (let indicator of RESULT_INDICATORS) {
+        for (let text of indicator.children) {
+            text.innerHTML = LANGUAGE[language][text.getAttribute("value")];
+        }
+    }
     for (let resultGun of RESULT_PLAYER_GUNS) {
         resultGun.innerHTML = ((resultGun.value == undefined) ? "" : LANGUAGE[language][resultGun.value]);
+    }
+    for (let resultRole of RESULT_PLAYER_ROLES) {
+        resultRole.innerHTML = ((resultRole.value == undefined) ? "" : LANGUAGE[language][resultRole.value]);
     }
     for (let resultRole of RESULT_PLAYER_ROLES) {
         resultRole.innerHTML = ((resultRole.value == undefined) ? "" : LANGUAGE[language][resultRole.value]);
