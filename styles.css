@@ -11,7 +11,7 @@ html, body {
     width: 100vw;
     height: 100vh;
     display: grid;
-    grid-template-rows: 15vh 90vh;
+    grid-template-rows: 15vh 85vh;
     justify-items: center;
 }
 
@@ -40,7 +40,7 @@ html, body {
 
 .tab {
     display: grid;
-    grid-template-rows: 80% auto;
+    grid-template-rows: 80% 20%;
     justify-items: center;
     align-items: center;
     width: 90vw;
@@ -53,7 +53,7 @@ html, body {
     grid-template-columns: repeat(5, 18vw);
     justify-items: center;
     align-items: center;
-    height: 30vw;
+    height: 50vh;
     width: 90vw;
 }  
 
@@ -67,7 +67,7 @@ html, body {
 
 .submit {
     width: 50vw;
-    height: 5vw;
+    height: 10vh;
     font-size: 3vw;
 }
 
