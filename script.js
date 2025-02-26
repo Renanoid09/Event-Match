@@ -14,7 +14,7 @@ const ActivateMenuButton = () => {
 }
 
 const Filter = (list, element) => {
-    if (CURRENT[list].length == 1) return;
+    if (CURRENT[list].length == 1 && [...document.getElementById(element).classList].includes("selected")) return;
     document.getElementById(element).classList.toggle("selected");
     if (CURRENT[list].includes(element)) CURRENT[list].splice(CURRENT[list].indexOf(element), 1);
     else CURRENT[list].push(element);
