@@ -86,14 +86,19 @@ html, body {
 
 .gun {
     border: .1vw solid black;
-    width: 15vw;
-    height: 5vw;
+    width: 90%;
+    height: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 2vw;
     background-color: rgb(255, 200, 200);
     transition: background .5s;
+}
+
+#gun-list {
+    display: grid;
+    grid-template-columns: repeat(3, calc(100% / 3));
 }
 
 .role {

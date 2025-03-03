@@ -21,7 +21,7 @@ const INDEX = {"player": 0, "map": 1, "gun": 2, "role": 3, "team": 4};
 
 const OPTIONS = {
     maps: ["Bind", "Haven", "Split", "Ascent", "Icebox", "Breeze", "Fracture", "Pearl", "Lotus", "Sunset", "Abyss"],
-    guns: ["SMG / Sheriff", "Shotgun / Ghost", "Rifle / classic", "Sniper / Frenzy", "Machinegun / Shorty"],
+    guns: ["SMG / Sheriff", "Shotgun / Ghost", "Rifle / classic", "Sniper / Frenzy", "Machinegun / Shorty", "Flex"],
     roles: ["Controller", "Initiator", "Sentinel", "Duelist", "Flex"]
 };
 
