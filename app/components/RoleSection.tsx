@@ -3,6 +3,7 @@
 
 import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { agentImageUrls, roleImageUrls } from './urls';
 
 const roles = [
   'Duelist', 'Initiator', 'Controller', 'Sentinel'
@@ -194,18 +195,11 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
               >
                 <div className="flex items-center gap-2">
                   {/* Role image */}
-                  {(() => {
-                    const sanitizedRole = role.replaceAll('/', '');
-                    const roleImg = `/roles/${sanitizedRole}.jpg`;
-                    return (
-                      <img
-                        src={roleImg}
-                        alt={role}
-                        className="w-8 h-8 object-cover rounded"
-                        onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/roles/placeholder.jpg'; }}
-                      />
-                    );
-                  })()}
+                  <img
+                    src={roleImageUrls[role]}
+                    alt={role}
+                    className="w-8 h-8 object-cover rounded"
+                  />
                 <h3 className="font-semibold text-white">{t('role_' + role) || role}</h3>
                 </div>
                 <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
@@ -219,9 +213,6 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {roleAgents.map(agent => {
                   const isBlacklisted = checkAgentBlacklisted(agent);
-                  // Image file name: /agents/AgentName.jpg (sanitize agent name)
-                  const sanitizedAgent = agent.replaceAll('/', '');
-                  const agentImg = `/agents/${sanitizedAgent}.jpg`;
                   return (
                     <div 
                       key={agent} 
@@ -234,10 +225,9 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
                     >
                       <div className="flex items-center gap-2">
                         <img
-                          src={agentImg}
+                          src={agentImageUrls[agent]}
                           alt={agent}
                           className="w-8 h-8 object-cover rounded"
-                          onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/agents/placeholder.jpg'; }}
                         />
                       <span className="text-slate-300">{t('agent_' + agent) || agent}</span>
                       </div>

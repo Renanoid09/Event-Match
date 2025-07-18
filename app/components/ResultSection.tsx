@@ -19,6 +19,7 @@ import {
   BarElement, // <-- Add this
 } from 'chart.js';
 import { weapons as weaponCategories } from './weapons';
+import { mapImageUrls, agentImageUrls, roleImageUrls } from './urls';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend, CategoryScale, LinearScale, BarElement); // <-- Add BarElement here
 
@@ -164,17 +165,15 @@ export default function ResultSection({ result, assignmentMode, randomizationSet
         <div className="flex items-center">
           {assignmentMode === 'agent' || assignmentMode === 'replication' ? (
             <img
-              src={`/agents/${(result.roles[player] || '').replaceAll('/', '')}.jpg`}
+              src={agentImageUrls[result.roles[player]]}
               alt={result.roles[player]}
               className="w-8 h-8 object-cover rounded mr-3"
-              onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/agents/placeholder.jpg'; }}
             />
           ) : (
             <img
-              src={`/roles/${(result.roles[player] || '').replaceAll('/', '')}.jpg`}
+              src={roleImageUrls[result.roles[player]]}
               alt={result.roles[player]}
               className="w-8 h-8 object-cover rounded mr-3"
-              onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/roles/placeholder.jpg'; }}
             />
           )}
           <span className="text-white font-medium">{player}</span>
@@ -504,10 +503,9 @@ export default function ResultSection({ result, assignmentMode, randomizationSet
       <div className="w-full flex flex-col items-center mb-8 gap-4">
         <div className="w-full aspect-[3/1] max-h-64 rounded-2xl overflow-hidden shadow-lg relative bg-gradient-to-br from-green-700/60 to-green-900/80 border border-green-500/30">
           <img
-            src={`/maps/${result.map.replaceAll('/', '')}.jpg`}
+            src={mapImageUrls[result.map]}
             alt={result.map}
             className="w-full h-full object-cover object-center"
-            onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = '/maps/placeholder.jpg'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <span className="absolute left-8 bottom-6 text-5xl font-extrabold text-white drop-shadow-[0_0_16px_rgba(0,255,255,0.8)] tracking-wide" style={{letterSpacing: '0.08em'}}>{t('map_' + result.map) || result.map}</span>

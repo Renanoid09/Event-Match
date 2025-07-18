@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { mapImageUrls } from './urls';
 
 const maps = [
   'Bind', 'Haven', 'Split', 'Ascent', 'Icebox', 'Breeze', 
@@ -50,7 +51,7 @@ export default function MapSection() {
               >
                 <div className="aspect-video bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg mb-3 relative overflow-hidden">
                   <img
-                    src={`/maps/${map}.jpg`}
+                    src={mapImageUrls[map]}
                     alt={map}
                     className="w-full h-full object-cover object-top"
                   />
