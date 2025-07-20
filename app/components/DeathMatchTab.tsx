@@ -3,27 +3,20 @@
 import { useState, useRef, useEffect } from 'react';
 import WeaponRandomizer from './WeaponRandomizer';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getSelectedWeapon, setSelectedWeapon } from './StateHandler';
 
 export default function DeathMatchTab() {
-  const [selectedWeapon, setSelectedWeapon] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('valorant_selected_weapon');
-      if (stored) return JSON.parse(stored);
-    }
-    return null;
-  });
+  const [selectedWeapon, setSelectedWeaponState] = useState<string | null>(() => getSelectedWeapon());
   const { t } = useLanguage();
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Save selectedWeapon to localStorage on change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_selected_weapon', JSON.stringify(selectedWeapon));
-    }
+    setSelectedWeapon(selectedWeapon);
   }, [selectedWeapon]);
 
   const handleRandomize = (weapon: string) => {
-    setSelectedWeapon(weapon);
+    setSelectedWeaponState(weapon);
     setTimeout(() => {
       if (resultRef.current) {
         resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });

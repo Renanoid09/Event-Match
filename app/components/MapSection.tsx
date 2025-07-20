@@ -10,7 +10,11 @@ const maps = [
   'Fracture', 'Pearl', 'Lotus', 'Sunset', 'Abyss', 'Corrode'
 ];
 
-export default function MapSection() {
+interface MapSectionProps {
+  onMapSelect?: (map: string) => void;
+}
+
+export default function MapSection({ onMapSelect }: MapSectionProps) {
   const [blacklistedMaps, setBlacklistedMaps] = useState<Set<string>>(new Set());
   const { t } = useLanguage();
 
@@ -43,7 +47,7 @@ export default function MapSection() {
           return (
             <div key={map} className="relative">
               <div 
-                onClick={() => toggleMapStatus(map)}
+                onClick={() => onMapSelect ? onMapSelect(map) : toggleMapStatus(map)}
                 className={`bg-slate-700/30 rounded-xl p-4 border transition-all cursor-pointer ${
                   isBlacklisted ? 'border-red-500/50 bg-red-900/20 opacity-50' :
                   'border-green-500/50 bg-green-900/20 hover:border-green-400'

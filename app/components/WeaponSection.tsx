@@ -4,21 +4,26 @@
 import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { weapons, primaryWeapons, secondaryWeapons, allWeapons } from './weapons';
+import { getWeaponSelectionMode, setWeaponSelectionMode, WeaponSelectionMode } from './StateHandler';
 
 interface WeaponGroup {
   id: string;
   name: string;
   primary: string;
   secondary: string;
-  type: 'category' | 'weapon';
+  type: 'category' | 'weapon' | 'manual';
 }
 
 const selectionModes = [
   { value: 'category', label: 'By Category' },
-  { value: 'weapon', label: 'By Weapon' }
+  { value: 'weapon', label: 'By Weapon' },
+  { value: 'manual', label: 'By Manual' }, // Added manual mode
 ];
 
-const WeaponSection = forwardRef(function WeaponSection(props, ref) {
+const WeaponSection = forwardRef(function WeaponSection(props: any, ref) {
+  const players: string[] = props.players || [];
+  const manualTeams = props.manualTeams || { team1: [], team2: [] };
+  const teamMode = props.teamMode || 'random';
   const [blacklistedWeapons, setBlacklistedWeapons] = useState<Set<string>>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('valorant_blacklisted_weapons');
@@ -41,7 +46,8 @@ const WeaponSection = forwardRef(function WeaponSection(props, ref) {
     return [];
   });
   const [newGroup, setNewGroup] = useState({ name: '', primary: '', secondary: '' });
-  const [selectionMode, setSelectionMode] = useState<'category' | 'weapon'>('category');
+  // Use a lazy initializer for selectionMode to restore from localStorage on first render
+  const [selectionMode, setSelectionModeState] = useState<WeaponSelectionMode>(() => getWeaponSelectionMode());
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [useCategoryGroups, setUseCategoryGroups] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -63,6 +69,11 @@ const WeaponSection = forwardRef(function WeaponSection(props, ref) {
   const { language } = useLanguage();
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   const [editGroup, setEditGroup] = useState<{ name: string; primary: string; secondary: string }>({ name: '', primary: '', secondary: '' });
+  type ManualAssignment = { player: string; type: 'category' | 'weapon'; value: string };
+  const [manualAssignments, setManualAssignments] = useState<ManualAssignment[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState('');
+  const [selectedValue, setSelectedValue] = useState('');
+  const [selectedType, setSelectedType] = useState<'category' | 'weapon' | ''>('');
 
   useEffect(() => {
     if (showGroupModal && modalRef.current) {
@@ -103,6 +114,34 @@ const WeaponSection = forwardRef(function WeaponSection(props, ref) {
       localStorage.setItem('valorant_use_weapon_groups', JSON.stringify(useWeaponGroups));
     }
   }, [useWeaponGroups]);
+
+  // Persist selectionMode to localStorage on change
+  useEffect(() => {
+    setWeaponSelectionMode(selectionMode);
+  }, [selectionMode]);
+
+  // Persist manualAssignments to localStorage when in 'manual' selectionMode
+  useEffect(() => {
+    if (typeof window !== 'undefined' && selectionMode === 'manual') {
+      localStorage.setItem('valorant_manual_weapon_assignments', JSON.stringify(manualAssignments));
+    }
+  }, [manualAssignments, selectionMode]);
+
+  // Restore manualAssignments from localStorage on mount if in manual mode
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('valorant_manual_weapon_assignments');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setManualAssignments(parsed);
+          }
+        } catch {}
+      }
+    }
+    // eslint-disable-next-line
+  }, []);
 
   const toggleAllWeaponsInCategory = (category: string) => {
     const categoryWeapons = weapons[category as keyof typeof weapons];
@@ -229,13 +268,13 @@ const WeaponSection = forwardRef(function WeaponSection(props, ref) {
       {/* Selection Mode Toggle */}
       <div className="mb-4 flex gap-3">
         <button
-          onClick={() => setSelectionMode('category')}
+          onClick={() => setSelectionModeState('category')}
           className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${selectionMode === 'category' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-orange-700'}`}
         >
           {t('byCategory')}
         </button>
         <button
-          onClick={() => setSelectionMode('weapon')}
+          onClick={() => setSelectionModeState('weapon')}
           className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${selectionMode === 'weapon' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-orange-700'}`}
         >
           {t('byWeapon')}
@@ -243,59 +282,61 @@ const WeaponSection = forwardRef(function WeaponSection(props, ref) {
       </div>
 
       {/* Weapon Categories or Weapons */}
-      <div className="space-y-6">
-        {Object.entries(weapons).map(([category, categoryWeapons]) => {
-          const isCatBlacklisted = isCategoryBlacklisted(category);
-          return (
-            <div key={category} className="bg-slate-700/30 rounded-xl p-4">
-              <div 
-                  onClick={selectionMode === 'category' ? () => toggleCategoryStatus(category) : selectionMode === 'weapon' ? () => toggleAllWeaponsInCategory(category) : undefined}
-                className={`flex items-center justify-between rounded-lg p-3 mb-3 cursor-pointer transition-all ${
-                  isCatBlacklisted 
-                    ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
-                    : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
-                  } ${selectionMode === 'category' ? '' : 'pointer-events-auto'} ${selectionMode === 'weapon' ? 'hover:opacity-80' : ''}`}
-              >
-                <h3 className="font-semibold text-white">{t(category)}</h3>
-                <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
-                  isCatBlacklisted ? 'bg-red-600' : 'bg-green-600'
-                }`}>
-                  <i className={`text-white text-sm ${
-                    isCatBlacklisted ? 'ri-close-line' : 'ri-check-line'
-                  }`}></i>
+      {(selectionMode === 'category' || selectionMode === 'weapon') && (
+        <div className="space-y-6">
+          {Object.entries(weapons).map(([category, categoryWeapons]) => {
+            const isCatBlacklisted = isCategoryBlacklisted(category);
+            return (
+              <div key={category} className="bg-slate-700/30 rounded-xl p-4">
+                <div 
+                    onClick={selectionMode === 'category' ? () => toggleCategoryStatus(category) : selectionMode === 'weapon' ? () => toggleAllWeaponsInCategory(category) : undefined}
+                  className={`flex items-center justify-between rounded-lg p-3 mb-3 cursor-pointer transition-all ${
+                    isCatBlacklisted 
+                      ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
+                      : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
+                    } ${selectionMode === 'category' ? '' : 'pointer-events-auto'} ${selectionMode === 'weapon' ? 'hover:opacity-80' : ''}`}
+                >
+                  <h3 className="font-semibold text-white">{t(category)}</h3>
+                  <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                    isCatBlacklisted ? 'bg-red-600' : 'bg-green-600'
+                  }`}>
+                    <i className={`text-white text-sm ${
+                      isCatBlacklisted ? 'ri-close-line' : 'ri-check-line'
+                    }`}></i>
+                  </div>
                 </div>
-              </div>
-                {selectionMode === 'weapon' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {categoryWeapons.map(weapon => {
-                  const isBlacklisted = isWeaponBlacklisted(weapon);
-                  return (
-                    <div 
-                      key={weapon} 
-                      onClick={() => toggleWeaponStatus(weapon, category)}
-                      className={`flex items-center justify-between rounded-lg p-3 cursor-pointer transition-all ${
-                        isBlacklisted 
-                          ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
-                          : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
-                      }`}
-                    >
-                      <span className="text-slate-300">{t('weapon_' + weapon) || weapon}</span>
-                      <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
-                        isBlacklisted ? 'bg-red-600' : 'bg-green-600'
-                      }`}>
-                        <i className={`text-white text-sm ${
-                          isBlacklisted ? 'ri-close-line' : 'ri-check-line'
-                        }`}></i>
+                  {selectionMode === 'weapon' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {categoryWeapons.map(weapon => {
+                    const isBlacklisted = isWeaponBlacklisted(weapon);
+                    return (
+                      <div 
+                        key={weapon} 
+                        onClick={() => toggleWeaponStatus(weapon, category)}
+                        className={`flex items-center justify-between rounded-lg p-3 cursor-pointer transition-all ${
+                          isBlacklisted 
+                            ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
+                            : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
+                        }`}
+                      >
+                        <span className="text-slate-300">{t('weapon_' + weapon) || weapon}</span>
+                        <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                          isBlacklisted ? 'bg-red-600' : 'bg-green-600'
+                        }`}>
+                          <i className={`text-white text-sm ${
+                            isBlacklisted ? 'ri-close-line' : 'ri-check-line'
+                          }`}></i>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                  )}
               </div>
-                )}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Weapon Groups */}
       {weaponGroups.filter(g => g.type === selectionMode).length > 0 && (

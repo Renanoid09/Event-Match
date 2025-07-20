@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { weapons as weaponTypes } from './weapons';
+import { getDMSelectionMode, setDMSelectionMode, getUseCategoryGroups, setUseCategoryGroups, getUseWeaponGroups, setUseWeaponGroups, DMSelectionMode } from './StateHandler';
 
 const selectionModes = [
   { value: 'category', label: 'By Category' },
@@ -39,13 +40,7 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
     return new Set();
   });
   const [randomizedWeapon, setRandomizedWeapon] = useState<string | null>(null);
-  const [selectionMode, setSelectionMode] = useState<'category' | 'weapon'>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('valorant_dm_selection_mode');
-      if (stored) return stored as 'category' | 'weapon';
-    }
-    return 'category';
-  });
+  const [selectionMode, setSelectionModeState] = useState<DMSelectionMode>(() => getDMSelectionMode());
   const [weaponGroups, setWeaponGroups] = useState<WeaponGroup[]>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('valorant_weapon_groups');
@@ -53,20 +48,8 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
     }
     return [];
   });
-  const [useCategoryGroups, setUseCategoryGroups] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('valorant_use_category_groups');
-      if (stored) return JSON.parse(stored);
-    }
-    return true;
-  });
-  const [useWeaponGroups, setUseWeaponGroups] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('valorant_use_weapon_groups');
-      if (stored) return JSON.parse(stored);
-    }
-    return true;
-  });
+  const [useCategoryGroups, setUseCategoryGroupsState] = useState<boolean>(() => getUseCategoryGroups());
+  const [useWeaponGroups, setUseWeaponGroupsState] = useState<boolean>(() => getUseWeaponGroups());
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: '', primary: '', secondary: '' });
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
@@ -88,9 +71,7 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
   }, [blacklistedWeapons]);
   // Save selectionMode to localStorage on change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_dm_selection_mode', selectionMode);
-    }
+    setDMSelectionMode(selectionMode);
   }, [selectionMode]);
   // Persist weaponGroups and toggles
   useEffect(() => {
@@ -99,14 +80,10 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
     }
   }, [weaponGroups]);
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_use_category_groups', JSON.stringify(useCategoryGroups));
-    }
+    setUseCategoryGroups(useCategoryGroups);
   }, [useCategoryGroups]);
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_use_weapon_groups', JSON.stringify(useWeaponGroups));
-    }
+    setUseWeaponGroups(useWeaponGroups);
   }, [useWeaponGroups]);
 
   const toggleTypeStatus = (type: string) => {
@@ -243,13 +220,13 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
       <div className="mb-4 flex gap-3 items-center justify-between">
         <div className="flex gap-3">
           <button
-            onClick={() => setSelectionMode('category')}
+            onClick={() => setSelectionModeState('category')}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${selectionMode === 'category' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-orange-700'}`}
           >
             {t('byCategory')}
           </button>
           <button
-            onClick={() => setSelectionMode('weapon')}
+            onClick={() => setSelectionModeState('weapon')}
             className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${selectionMode === 'weapon' ? 'bg-orange-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-orange-700'}`}
           >
             {t('byWeapon')}
@@ -330,7 +307,7 @@ export default function WeaponRandomizer({ onRandomize, hideResult }: WeaponRand
               <span className="text-slate-300 text-sm">{t('useForRandomization')}</span>
               <button
                 type="button"
-                onClick={() => selectionMode === 'category' ? setUseCategoryGroups((v: boolean) => !v) : setUseWeaponGroups((v: boolean) => !v)}
+                onClick={() => selectionMode === 'category' ? setUseCategoryGroupsState((v: boolean) => !v) : setUseWeaponGroupsState((v: boolean) => !v)}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none border ${
                   (selectionMode === 'category' ? useCategoryGroups : useWeaponGroups)
                     ? 'bg-green-600 border-green-700' : 'bg-slate-600 border-blue-700'

@@ -4,6 +4,7 @@
 import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { agentImageUrls, roleImageUrls } from './urls';
+import { getAssignmentMode, setAssignmentMode, AssignmentMode } from './StateHandler';
 
 const roles = [
   'Duelist', 'Initiator', 'Controller', 'Sentinel'
@@ -19,16 +20,13 @@ const agents = {
 const assignmentModes = [
   { value: 'role', label: 'Assign by Role' },
   { value: 'agent', label: 'Assign by Agent' },
-  { value: 'replication', label: 'Replication' }
+  { value: 'replication', label: 'Replication' },
+  { value: 'manual', label: 'By Manual' }, // Added manual mode
 ];
 
-const RoleSection = forwardRef(function RoleSection(props, ref) {
-  const [assignmentMode, setAssignmentMode] = useState<'role' | 'agent' | 'replication'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('valorant_assignment_mode') as 'role' | 'agent' | 'replication') || 'role';
-    }
-    return 'role';
-  });
+const RoleSection = forwardRef(function RoleSection(props: any, ref) {
+  const players: string[] = props.players || [];
+  const [assignmentMode, setAssignmentModeState] = useState<AssignmentMode>(() => getAssignmentMode());
   const [blacklistedRoles, setBlacklistedRoles] = useState<Set<string>>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('valorant_blacklisted_roles');
@@ -44,6 +42,9 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
     return new Set();
   });
   const [playerAgents, setPlayerAgents] = useState<{ [player: string]: string }>({});
+  const [manualRoleAssignments, setManualRoleAssignments] = useState<{ player: string, role: string }[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
   const { t } = useLanguage();
 
   // Expose mode and assignments to parent
@@ -51,14 +52,13 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
     getAssignmentMode: () => assignmentMode,
     getPlayerAgents: () => playerAgents,
     getBlacklistedRoles: () => blacklistedRoles,
-    getBlacklistedAgents: () => blacklistedAgents
+    getBlacklistedAgents: () => blacklistedAgents,
+    setAssignmentMode: (mode: AssignmentMode) => setAssignmentModeState(mode),
   }), [assignmentMode, playerAgents, blacklistedRoles, blacklistedAgents]);
 
   // Save assignmentMode to localStorage on change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_assignment_mode', assignmentMode);
-    }
+    setAssignmentMode(assignmentMode);
   }, [assignmentMode]);
   // Save blacklistedRoles to localStorage on change
   useEffect(() => {
@@ -147,19 +147,19 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
       {/* Assignment Mode Selector */}
       <div className="mb-6 flex gap-3">
         <button
-          onClick={() => setAssignmentMode('role')}
+          onClick={() => setAssignmentModeState('role')}
           className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${assignmentMode === 'role' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-purple-700'}`}
         >
           {t('assignByRole')}
         </button>
         <button
-          onClick={() => setAssignmentMode('agent')}
+          onClick={() => setAssignmentModeState('agent')}
           className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${assignmentMode === 'agent' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-purple-700'}`}
         >
           {t('assignByAgent')}
         </button>
         <button
-          onClick={() => setAssignmentMode('replication')}
+          onClick={() => setAssignmentModeState('replication')}
           className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${assignmentMode === 'replication' ? 'bg-purple-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-purple-700'}`}
         >
           {t('replication')}
@@ -210,38 +210,41 @@ const RoleSection = forwardRef(function RoleSection(props, ref) {
                   }`}></i>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {roleAgents.map(agent => {
-                  const isBlacklisted = checkAgentBlacklisted(agent);
-                  return (
-                    <div 
-                      key={agent} 
-                      onClick={() => toggleAgentStatus(agent, role)}
-                      className={`flex items-center justify-between rounded-lg p-3 cursor-pointer transition-all ${
-                        isBlacklisted 
-                          ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
-                          : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={agentImageUrls[agent]}
-                          alt={agent}
-                          className="w-8 h-8 object-cover rounded"
-                        />
-                      <span className="text-slate-300">{t('agent_' + agent) || agent}</span>
+              {/* Only show agents if assignmentMode is not 'role' */}
+              {assignmentMode !== 'role' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {roleAgents.map(agent => {
+                    const isBlacklisted = checkAgentBlacklisted(agent);
+                    return (
+                      <div 
+                        key={agent} 
+                        onClick={() => toggleAgentStatus(agent, role)}
+                        className={`flex items-center justify-between rounded-lg p-3 cursor-pointer transition-all ${
+                          isBlacklisted 
+                            ? 'bg-red-900/20 border border-red-500/50 opacity-50' 
+                            : 'bg-green-900/20 border border-green-500/50 hover:border-green-400'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={agentImageUrls[agent]}
+                            alt={agent}
+                            className="w-8 h-8 object-cover rounded"
+                          />
+                        <span className="text-slate-300">{t('agent_' + agent) || agent}</span>
+                        </div>
+                        <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
+                          isBlacklisted ? 'bg-red-600' : 'bg-green-600'
+                        }`}>
+                          <i className={`text-white text-sm ${
+                            isBlacklisted ? 'ri-close-line' : 'ri-check-line'
+                          }`}></i>
+                        </div>
                       </div>
-                      <div className={`w-6 h-6 flex items-center justify-center rounded-full ${
-                        isBlacklisted ? 'bg-red-600' : 'bg-green-600'
-                      }`}>
-                        <i className={`text-white text-sm ${
-                          isBlacklisted ? 'ri-close-line' : 'ri-check-line'
-                        }`}></i>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}

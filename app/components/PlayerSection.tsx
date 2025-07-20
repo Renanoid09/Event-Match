@@ -3,19 +3,20 @@
 
 import { useState, forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getTeamMode, setTeamMode, TeamMode, getSubcategory, setSubcategory } from './StateHandler';
 
 interface PlayerSectionProps {
   players: string[];
   onPlayersChange: (players: string[]) => void;
+  onManualTeamsChange?: (teams: { team1: string[]; team2: string[] }) => void;
+  onTeamModeChange?: (mode: 'random' | 'manual') => void;
 }
 
-const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChange }: PlayerSectionProps, ref) {
+const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChange, onManualTeamsChange, onTeamModeChange }: PlayerSectionProps, ref) {
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [teamMode, setTeamMode] = useState<'random' | 'manual'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('valorant_team_mode') as 'random' | 'manual') || 'random';
-    }
-    return 'random';
+  const [teamMode, setTeamModeState] = useState<TeamMode>(() => {
+    // Try to restore from subcategory state first, fallback to getTeamMode
+    return getSubcategory<TeamMode>('valorant_players_subtab', getTeamMode());
   });
   const [manualTeams, setManualTeams] = useState<{ team1: string[]; team2: string[] }>(() => {
     if (typeof window !== 'undefined') {
@@ -47,17 +48,26 @@ const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChan
 
   // Save teamMode to localStorage on change
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('valorant_team_mode', teamMode);
+    setTeamMode(teamMode);
+    if (onTeamModeChange) {
+      onTeamModeChange(teamMode);
     }
-  }, [teamMode]);
+  }, [teamMode, onTeamModeChange]);
 
   // Save manualTeams to localStorage on change
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('valorant_manual_teams', JSON.stringify(manualTeams));
     }
-  }, [manualTeams]);
+    if (onManualTeamsChange) {
+      onManualTeamsChange(manualTeams);
+    }
+  }, [manualTeams, onManualTeamsChange]);
+
+  // Persist subcategory state on teamMode change
+  useEffect(() => {
+    setSubcategory('valorant_players_subtab', teamMode);
+  }, [teamMode]);
 
   useImperativeHandle(ref, () => ({
     getTeamMode: () => teamMode,
@@ -99,6 +109,12 @@ const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChan
     return players.filter(p => !manualTeams.team1.includes(p) && !manualTeams.team2.includes(p));
   };
 
+  const setTeamModeAndResetTeams = (mode: TeamMode) => {
+    setTeamModeState(mode);
+    setSubcategory('valorant_players_subtab', mode);
+    // Do not clear manualTeams when switching modes; preserve last manual assignment
+  };
+
   return (
     <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700 p-6">
       <div className="flex items-center mb-6">
@@ -138,7 +154,7 @@ const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChan
       <div className="mb-6">
         <div className="flex bg-slate-700/50 rounded-lg p-1">
           <button
-            onClick={() => setTeamMode('random')}
+            onClick={() => setTeamModeAndResetTeams('random')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-all whitespace-nowrap ${
               teamMode === 'random'
                 ? 'bg-blue-600 text-white'
@@ -148,7 +164,7 @@ const PlayerSection = forwardRef(function PlayerSection({ players, onPlayersChan
             {t('randomTeams')}
           </button>
           <button
-            onClick={() => setTeamMode('manual')}
+            onClick={() => setTeamModeAndResetTeams('manual')}
             className={`flex-1 py-2 px-4 rounded-md font-medium transition-all whitespace-nowrap ${
               teamMode === 'manual'
                 ? 'bg-blue-600 text-white'

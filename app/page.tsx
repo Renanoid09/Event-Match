@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { getMainTab, setMainTab, MainTab } from './components/StateHandler';
 import DeathMatchTab from './components/DeathMatchTab';
 import CompetitiveTab from './components/CompetitiveTab';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -35,6 +36,9 @@ function SettingsTab() {
         if (data.maps) {
           localStorage.setItem('valorant_blacklisted_maps', JSON.stringify(data.maps.blacklistedMaps || []));
         }
+        // Preserve last active sub-tab in CompetitiveTab
+        const lastSubTab = localStorage.getItem('valorant_active_tab') || 'players';
+        localStorage.setItem('valorant_active_tab', lastSubTab);
         window.location.reload();
       } catch {
         alert('Invalid or corrupted settings file.');
@@ -112,22 +116,17 @@ function SettingsTab() {
 }
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'deathmatch' | 'competitive' | 'settings'>();
+  const [activeTab, setActiveTab] = useState<MainTab>();
   const { t } = useLanguage();
   const competitiveTabRef = useRef<any>(null);
 
   // Save activeTab to localStorage on change
   useEffect(() => {
-    const stored = localStorage.getItem('valorant_main_tab');
-    if (stored === 'competitive' || stored === 'deathmatch' || stored === 'settings') {
-      setActiveTab(stored);
-    } else {
-      setActiveTab('deathmatch');
-    }
+    setActiveTab(getMainTab());
   }, []);
   useEffect(() => {
     if (activeTab) {
-      localStorage.setItem('valorant_main_tab', activeTab);
+      setMainTab(activeTab);
     }
   }, [activeTab]);
 
@@ -157,6 +156,9 @@ export default function Home() {
         if (data.maps) {
           localStorage.setItem('valorant_blacklisted_maps', JSON.stringify(data.maps.blacklistedMaps || []));
         }
+        // Preserve last active sub-tab in CompetitiveTab
+        const lastSubTab = localStorage.getItem('valorant_active_tab') || 'players';
+        localStorage.setItem('valorant_active_tab', lastSubTab);
         window.location.reload();
       } catch {
         alert('Invalid or corrupted settings file.');
@@ -168,13 +170,35 @@ export default function Home() {
   if (!activeTab) return null;
 
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'deathmatch' | 'competitive' | 'settings');
+    setActiveTab(tab as MainTab);
     if (tab === 'competitive') {
       setTimeout(() => {
         competitiveTabRef.current?.focusPlayerInput && competitiveTabRef.current.focusPlayerInput();
       }, 50);
     }
   };
+
+  // Define main sections for tab navigation
+  const mainSections = [
+    {
+      key: 'deathmatch',
+      label: t('deathmatch'),
+      icon: 'ri-crosshair-line',
+      tooltip: 'Deathmatch (Main Section)'
+    },
+    {
+      key: 'competitive',
+      label: t('competitive'),
+      icon: 'ri-trophy-line',
+      tooltip: 'Competitive (Main Section)'
+    },
+    {
+      key: 'settings',
+      label: t('settings') || 'Settings',
+      icon: 'ri-settings-3-line',
+      tooltip: 'Settings (Main Section)'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900">
@@ -188,35 +212,22 @@ export default function Home() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex justify-center mb-8">
+        {/* Main Sections (Deathmatch, Competitive, Settings) */}
+        <div className="flex flex-col items-center mb-8">
           <div className="bg-slate-800/50 backdrop-blur-sm rounded-full p-1 border border-slate-700">
-            <button
-              onClick={() => handleTabChange('deathmatch')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${activeTab === 'deathmatch' ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400'}`}
-            >
-              <div className="w-5 h-5 inline-flex items-center justify-center mr-2">
-                <i className="ri-crosshair-line"></i>
-              </div>
-              {t('deathmatch')}
-            </button>
-            <button
-              onClick={() => handleTabChange('competitive')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${activeTab === 'competitive' ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400'}`}
-            >
-              <div className="w-5 h-5 inline-flex items-center justify-center mr-2">
-                <i className="ri-trophy-line"></i>
-              </div>
-              {t('competitive')}
-            </button>
-            <button
-              onClick={() => handleTabChange('settings')}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400'}`}
-            >
-              <div className="w-5 h-5 inline-flex items-center justify-center mr-2">
-                <i className="ri-settings-3-line"></i>
-              </div>
-              {t('settings') || 'Settings'}
-            </button>
+            {mainSections.map((section) => (
+              <button
+                key={section.key}
+                onClick={() => handleTabChange(section.key)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-colors whitespace-nowrap ${activeTab === section.key ? 'bg-slate-700 text-white' : 'bg-slate-900 text-slate-400'}`}
+                title={section.tooltip}
+              >
+                <div className="w-5 h-5 inline-flex items-center justify-center mr-2">
+                  <i className={section.icon}></i>
+                </div>
+                {section.label}
+              </button>
+            ))}
           </div>
         </div>
 

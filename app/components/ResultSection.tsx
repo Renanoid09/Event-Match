@@ -72,6 +72,12 @@ const agentUtilities: { [agent: string]: { flash: boolean; info: boolean; deny: 
   Vyse:        { flash: false, info: false, deny: false, entry: false, hold: true  },
 };
 
+// Utility: Proper agent display name
+const getAgentDisplayName = (agent: string, t: (key: string) => string) => {
+  const translated = t('agent_' + agent);
+  return (translated && translated !== 'agent_' + agent) ? translated : (agent || '?');
+};
+
 export default function ResultSection({ result, assignmentMode, randomizationSettings }: ResultSectionProps) {
   const { t } = useLanguage();
   const resultRef = useRef<HTMLDivElement>(null);
@@ -159,36 +165,50 @@ export default function ResultSection({ result, assignmentMode, randomizationSet
     window.location.reload();
   };
 
-  const renderPlayerRow = (player: string, index: number, teamColor: 'red' | 'blue') => (
-    <div key={player} className={`bg-${teamColor}-800/20 rounded-lg p-4`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {assignmentMode === 'agent' || assignmentMode === 'replication' ? (
-            <img
-              src={agentImageUrls[result.roles[player]]}
-              alt={result.roles[player]}
-              className="w-8 h-8 object-cover rounded mr-3"
-            />
-          ) : (
-            <img
-              src={roleImageUrls[result.roles[player]]}
-              alt={result.roles[player]}
-              className="w-8 h-8 object-cover rounded mr-3"
-            />
-          )}
-          <span className="text-white font-medium">{player}</span>
-        </div>
-        <div className="flex flex-col justify-center text-right h-8">
-          <div className="text-slate-300 text-xs">{t('role_' + result.roles[player]) || result.roles[player]}</div>
-          <div className="text-slate-300 text-xs">
-            {t('weapon_' + result.weapons[player]?.primary) || result.weapons[player]?.primary}
-            {' • '}
-            {t('weapon_' + result.weapons[player]?.secondary) || result.weapons[player]?.secondary}
+  const renderPlayerRow = (player: string, index: number, teamColor: 'red' | 'blue') => {
+    const agent = result.roles[player];
+    const agentImg = agentImageUrls[agent];
+    return (
+      <div key={player} className={`bg-${teamColor}-800/20 rounded-lg p-4`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            {assignmentMode === 'agent' || assignmentMode === 'replication' ? (
+              agentImg ? (
+                <img
+                  src={agentImg}
+                  alt={agent}
+                  className="w-8 h-8 object-cover rounded mr-3"
+                />
+              ) : (
+                <div className="w-8 h-8 flex items-center justify-center rounded mr-3 bg-slate-700 text-white font-bold text-lg">
+                  {agent?.[0] || '?'}
+                </div>
+              )
+            ) : (
+              <img
+                src={roleImageUrls[result.roles[player]]}
+                alt={result.roles[player] || '?'}
+                className="w-8 h-8 object-cover rounded mr-3"
+              />
+            )}
+            <span className="text-white font-medium">{player}</span>
+          </div>
+          <div className="flex flex-col justify-center text-right h-8">
+            <div className="text-slate-300 text-xs">
+              {assignmentMode === 'agent' || assignmentMode === 'replication'
+                ? getAgentDisplayName(agent, t)
+                : (t('role_' + result.roles[player]) !== 'role_' + result.roles[player] ? t('role_' + result.roles[player]) : (result.roles[player] || '?'))}
+            </div>
+            <div className="text-slate-300 text-xs">
+              {(t('weapon_' + result.weapons[player]?.primary) !== 'weapon_' + result.weapons[player]?.primary ? t('weapon_' + result.weapons[player]?.primary) : (result.weapons[player]?.primary || '?'))}
+              {' • '}
+              {(t('weapon_' + result.weapons[player]?.secondary) !== 'weapon_' + result.weapons[player]?.secondary ? t('weapon_' + result.weapons[player]?.secondary) : (result.weapons[player]?.secondary || '?'))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderEmptyRow = (key: string, teamColor: 'red' | 'blue', idx: number, playersLength: number) => (
     <div key={key} className={`bg-${teamColor}-800/10 rounded-lg p-4 opacity-0`}>
